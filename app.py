@@ -5,10 +5,9 @@ import functools
 import tempfile
 import subprocess
 import uuid
-
 import json
+import requests  # <-- AJOUTÉ (manquait)
 from io import BytesIO
-
 
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
@@ -47,21 +46,19 @@ twilio_auth_token = os.environ.get('TWILIO_AUTH_TOKEN', 'ton_auth_token')
 twilio_phone_number = os.environ.get('TWILIO_PHONE_NUMBER', '+1234567890')
 twilio_client = Client(twilio_account_sid, twilio_auth_token)
 
-# Configuration WeasyPrint (adaptez le chemin si nécessaire)
-##WEASYPRINT_DLL_PATH = r'C:\msys64\ucrt64\bin'
-#if os.path.exists(WEASYPRINT_DLL_PATH):
-    #os.environ['WEASYPRINT_DLL_DIRECTORIES'] = WEASYPRINT_DLL_PATH
-   # try:
-      #  os.add_dll_directory(WEASYPRINT_DLL_PATH)
-    #except AttributeError:
-      #  pass
-#else:
-   # print(f"ERREUR : le dossier {WEASYPRINT_DLL_PATH} n'existe pas.")
-  #  sys.exit(1)
-
-#from weasyprint import HTML
-#WEASYPRINT_EXE = r'C:\weasyprint\weasyprint.exe'  # chemin vers l'exécutable
-
+# Configuration WeasyPrint (commentée car non utilisée en ligne pour l'instant)
+# WEASYPRINT_DLL_PATH = r'C:\msys64\ucrt64\bin'
+# if os.path.exists(WEASYPRINT_DLL_PATH):
+#     os.environ['WEASYPRINT_DLL_DIRECTORIES'] = WEASYPRINT_DLL_PATH
+#     try:
+#         os.add_dll_directory(WEASYPRINT_DLL_PATH)
+#     except AttributeError:
+#         pass
+# else:
+#     print(f"ERREUR : le dossier {WEASYPRINT_DLL_PATH} n'existe pas.")
+#     sys.exit(1)
+# from weasyprint import HTML
+# WEASYPRINT_EXE = r'C:\weasyprint\weasyprint.exe'  # chemin vers l'exécutable
 
 # -------------------- Configuration PAYTECH --------------------
 PAYTECH_API_KEY = os.environ.get('PAYTECH_API_KEY')
@@ -75,7 +72,7 @@ def initier_paiement_paytech(montant, telephone, commande_id, description="Comma
         'API_SECRET': PAYTECH_SECRET_KEY,
         'Content-Type': 'application/json'
     }
-    
+
     # Construction du payload selon la documentation
     payload = {
         'item_name': description[:50],              # Nom court du produit
@@ -88,26 +85,26 @@ def initier_paiement_paytech(montant, telephone, commande_id, description="Comma
         'success_url': url_for('confirmation', commande_id=commande_id, _external=True),
         'cancel_url': url_for('paiement_erreur', commande_id=commande_id, _external=True)
     }
-    
+
     # Si un téléphone est fourni, on peut cibler une méthode de paiement
     if telephone:
         payload['target_payment'] = 'Orange Money, Wave, Free Money'
-    
+
     try:
         full_url = f"{PAYTECH_BASE_URL}/payment/request-payment"  # Endpoint corrigé
         print(f"Envoi requête PAYTECH vers {full_url}")
         print(f"Payload: {payload}")
-        
+
         response = requests.post(
             full_url,
             json=payload,
             headers=headers,
             timeout=30
         )
-        
+
         print(f"Réponse HTTP {response.status_code}")
         print(f"Contenu: {response.text}")
-        
+
         if response.status_code == 200:
             data = response.json()
             if data.get('success') == 1:
@@ -121,7 +118,7 @@ def initier_paiement_paytech(montant, telephone, commande_id, description="Comma
         else:
             print(f"Erreur HTTP {response.status_code}")
             return None
-            
+
     except requests.exceptions.RequestException as e:
         print(f"Erreur PAYTECH : {e}")
         return None
@@ -131,7 +128,7 @@ def paytech_webhook():
     """Reçoit la confirmation de paiement de PAYTECH."""
     data = request.json
     print("Webhook reçu :", data)
-    
+
     ref_command = data.get('ref_command')
     if ref_command and ref_command.startswith('CMD'):
         commande_id = ref_command[3:]
@@ -141,7 +138,7 @@ def paytech_webhook():
                        ('payée', 'paytech', commande_id))
             db.commit()
             return jsonify({'message': 'OK'}), 200
-    
+
     return jsonify({'error': 'Invalid data'}), 400
 
 @app.route('/paiement_erreur/<int:commande_id>')
@@ -172,22 +169,84 @@ def login_required(view):
     return wrapped_view
 
 def init_db():
+    """Crée les tables et insère les données de base si elles n'existent pas."""
     db = get_db()
-    # Créer les tables si elles n'existent pas (vous pouvez reprendre le code de database.py)
+    # Création des tables (selon votre schéma original)
     db.executescript('''
-        CREATE TABLE IF NOT EXISTS restaurants (...);
-        CREATE TABLE IF NOT EXISTS tables (...);
-        -- etc.
+        CREATE TABLE IF NOT EXISTS restaurants (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nom TEXT NOT NULL,
+            adresse TEXT,
+            telephone TEXT
+        );
+        CREATE TABLE IF NOT EXISTS tables (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            numero INTEGER NOT NULL,
+            restaurant_id INTEGER NOT NULL,
+            FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+        );
+        CREATE TABLE IF NOT EXISTS categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nom TEXT NOT NULL,
+            restaurant_id INTEGER NOT NULL,
+            FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+        );
+        CREATE TABLE IF NOT EXISTS plats (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nom TEXT NOT NULL,
+            description TEXT,
+            prix REAL NOT NULL,
+            categorie_id INTEGER NOT NULL,
+            restaurant_id INTEGER NOT NULL,
+            image_url TEXT,
+            FOREIGN KEY (categorie_id) REFERENCES categories(id),
+            FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+        );
+        CREATE TABLE IF NOT EXISTS commandes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            table_id INTEGER NOT NULL,
+            statut TEXT NOT NULL,
+            total REAL NOT NULL,
+            mode_paiement TEXT,
+            date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (table_id) REFERENCES tables(id)
+        );
+        CREATE TABLE IF NOT EXISTS commande_details (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            commande_id INTEGER NOT NULL,
+            plat_id INTEGER NOT NULL,
+            quantite INTEGER NOT NULL,
+            FOREIGN KEY (commande_id) REFERENCES commandes(id),
+            FOREIGN KEY (plat_id) REFERENCES plats(id)
+        );
     ''')
-    # Vérifier si le restaurant 1 existe, sinon l'insérer
+
+    # Vérifier si le restaurant 1 existe, sinon l'initialiser
     resto = db.execute('SELECT * FROM restaurants WHERE id = 1').fetchone()
     if not resto:
         db.execute("INSERT INTO restaurants (id, nom, adresse, telephone) VALUES (1, 'Néo Pizza', 'Guédiawaye', '78 730 19 19')")
-        # Insérer des tables (1 à 10)
-        for i in range(1,11):
+        # Créer les tables 1 à 10
+        for i in range(1, 11):
             db.execute("INSERT INTO tables (numero, restaurant_id) VALUES (?, ?)", (i, 1))
-        # Insérer des catégories et plats...
+        # Ajouter les catégories
+        categories = ['PIZZA', 'TACOS', 'POUL PANÉ', 'BOX SALÉ', 'DESSERTS & BOISSONS']
+        for cat in categories:
+            db.execute("INSERT INTO categories (nom, restaurant_id) VALUES (?, ?)", (cat, 1))
+        # Ajouter quelques plats (vous pouvez compléter avec vos données)
+        # Exemple pour la catégorie PIZZA (à adapter)
+        pizza_id = db.execute("SELECT id FROM categories WHERE nom = 'PIZZA' AND restaurant_id = 1").fetchone()['id']
+        plats_pizza = [
+            ("REINE DE MON CŒUR", "Mergeuz ou jambon, piment vert, fromage, sauce tomates", 4500, pizza_id),
+            ("MOUSSAKA", "Viande hachée, poivron, fromage, sauce tomates", 3500, pizza_id),
+        ]
+        for nom, desc, prix, cat_id in plats_pizza:
+            db.execute("INSERT INTO plats (nom, description, prix, categorie_id, restaurant_id) VALUES (?, ?, ?, ?, 1)",
+                       (nom, desc, prix, cat_id))
         db.commit()
+
+# Appeler l'initialisation au démarrage (dans le contexte de l'application)
+with app.app_context():
+    init_db()
 
 def envoyer_sms(telephone, message):
     try:
@@ -212,8 +271,6 @@ def save_uploaded_image(file):
     return None
 
 # -------------------- Routes publiques (client) --------------------
-  # déjà importé normalement
-
 @app.route('/')
 def accueil():
     # Valeurs par défaut : restaurant 1, table 1
@@ -684,52 +741,53 @@ def kitchen_view():
     return render_template('kitchen.html', commandes=commandes_details)
 
 # -------------------- Exports PDF et Excel --------------------
-@app.route('/export/pdf/<int:commande_id>')
-@login_required
-def export_pdf(commande_id):
-    db = get_db()
-    commande = db.execute('''
-        SELECT c.*, t.numero as table_num
-        FROM commandes c
-        JOIN tables t ON c.table_id = t.id
-        WHERE c.id = ?
-    ''', (commande_id,)).fetchone()
-
-    details = db.execute('''
-        SELECT p.nom, cd.quantite, p.prix
-        FROM commande_details cd
-        JOIN plats p ON cd.plat_id = p.id
-        WHERE cd.commande_id = ?
-    ''', (commande_id,)).fetchall()
-
-    html_content = render_template('facture_pdf.html', commande=commande, details=details)
-
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as f:
-        f.write(html_content)
-        html_path = f.name
-
-    pdf_path = tempfile.mktemp(suffix='.pdf')
-
-    try:
-        subprocess.run(
-            [WEASYPRINT_EXE, html_path, pdf_path],
-            check=True,
-            capture_output=True,
-            text=True
-        )
-        with open(pdf_path, 'rb') as f:
-            pdf_data = f.read()
-        response = make_response(pdf_data)
-        response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'attachment; filename=facture_{commande_id}.pdf'
-        return response
-    except subprocess.CalledProcessError as e:
-        print(f"Erreur WeasyPrint : {e.stderr}")
-        return f"Erreur lors de la génération du PDF : {e.stderr}", 500
-    finally:
-        os.unlink(html_path)
-        if os.path.exists(pdf_path):
-            os.unlink(pdf_path)
+# ROUTE PDF DÉSACTIVÉE POUR LE DÉPLOIEMENT (problème WeasyPrint)
+# @app.route('/export/pdf/<int:commande_id>')
+# @login_required
+# def export_pdf(commande_id):
+#     db = get_db()
+#     commande = db.execute('''
+#         SELECT c.*, t.numero as table_num
+#         FROM commandes c
+#         JOIN tables t ON c.table_id = t.id
+#         WHERE c.id = ?
+#     ''', (commande_id,)).fetchone()
+#
+#     details = db.execute('''
+#         SELECT p.nom, cd.quantite, p.prix
+#         FROM commande_details cd
+#         JOIN plats p ON cd.plat_id = p.id
+#         WHERE cd.commande_id = ?
+#     ''', (commande_id,)).fetchall()
+#
+#     html_content = render_template('facture_pdf.html', commande=commande, details=details)
+#
+#     with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as f:
+#         f.write(html_content)
+#         html_path = f.name
+#
+#     pdf_path = tempfile.mktemp(suffix='.pdf')
+#
+#     try:
+#         subprocess.run(
+#             [WEASYPRINT_EXE, html_path, pdf_path],
+#             check=True,
+#             capture_output=True,
+#             text=True
+#         )
+#         with open(pdf_path, 'rb') as f:
+#             pdf_data = f.read()
+#         response = make_response(pdf_data)
+#         response.headers['Content-Type'] = 'application/pdf'
+#         response.headers['Content-Disposition'] = f'attachment; filename=facture_{commande_id}.pdf'
+#         return response
+#     except subprocess.CalledProcessError as e:
+#         print(f"Erreur WeasyPrint : {e.stderr}")
+#         return f"Erreur lors de la génération du PDF : {e.stderr}", 500
+#     finally:
+#         os.unlink(html_path)
+#         if os.path.exists(pdf_path):
+#             os.unlink(pdf_path)
 
 @app.route('/export/excel')
 @login_required
