@@ -2,11 +2,11 @@ import os
 import sys
 import sqlite3
 import functools
-import tempfile
+import tempfileM
 import subprocess
 import uuid
 import json
-import requests  # <-- AJOUTE (manquait)
+import requests  # <-- AJOUTÉ (manquait)
 from io import BytesIO
 
 from werkzeug.utils import secure_filename
@@ -866,4 +866,3 @@ def notifier_client(commande_id):
 # -------------------- Lancement de l'application --------------------
 if __name__ == '__main__':
     app.run(debug=True)
-
