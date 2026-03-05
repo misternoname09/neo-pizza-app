@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Modifier une catégorie</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .form-container { max-width: 400px; margin: 30px auto; background: white; padding: 20px; border-radius: 8px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn { background-color: #c72a2a; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Modifier la catégorie</h2>
+        <form method="post">
+            <div class="form-group">
+                <label for="nom">Nom de la catégorie</label>
+                <input type="text" name="nom" id="nom" value="{{ categorie['nom'] }}" required>
+            </div>
+            <button type="submit" class="btn">Enregistrer</button>
+            <a href="/categories" class="btn" style="background-color: #666;">Annuler</a>
+        </form>
+    </div>
+</body>
+</html>

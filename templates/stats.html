@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Statistiques - Néo Pizza</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .stats-container { max-width: 1200px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; }
+        .kpi { display: flex; justify-content: space-around; margin-bottom: 40px; flex-wrap: wrap; }
+        .kpi-card { background: #f2f2f2; padding: 20px; border-radius: 8px; text-align: center; min-width: 200px; margin: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .kpi-card h3 { margin: 0; color: #c72a2a; }
+        .kpi-card .value { font-size: 2em; font-weight: bold; color: #333; }
+        .charts { display: flex; flex-wrap: wrap; gap: 30px; margin-top: 30px; }
+        .chart-container { flex: 1 1 400px; background: #f9f9f9; padding: 20px; border-radius: 8px; }
+        canvas { max-height: 300px; }
+        .btn-retour { display: inline-block; background-color: #c72a2a; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="resto-info">
+        <h1>Statistiques</h1>
+        <p><a href="/dashboard" class="btn-retour">← Retour au tableau de bord</a></p>
+    </div>
+
+    <div class="stats-container">
+        <!-- Indicateurs clés -->
+        <div class="kpi">
+            <div class="kpi-card">
+                <h3>Chiffre d'affaires du jour</h3>
+                <div class="value">{{ ca_jour }} FCFA</div>
+            </div>
+            <div class="kpi-card">
+                <h3>Chiffre d'affaires de la semaine</h3>
+                <div class="value">{{ ca_semaine }} FCFA</div>
+            </div>
+            <div class="kpi-card">
+                <h3>Chiffre d'affaires du mois</h3>
+                <div class="value">{{ ca_mois }} FCFA</div>
+            </div>
+            <div class="kpi-card">
+                <h3>Commandes aujourd'hui</h3>
+                <div class="value">{{ nb_commandes_jour }}</div>
+            </div>
+        </div>
+
+        <!-- Graphiques -->
+        <div class="charts">
+            <div class="chart-container">
+                <h2>Top 5 des plats les plus vendus</h2>
+                <canvas id="topPlatsChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h2>Répartition des paiements</h2>
+                <canvas id="paiementsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Données pour le top 5 des plats
+        const topPlatsLabels = [{% for plat in top_plats %}'{{ plat["nom"] }}'{% if not loop.last %}, {% endif %}{% endfor %}];
+        const topPlatsData = [{% for plat in top_plats %}{{ plat["total_vendu"] }}{% if not loop.last %}, {% endif %}{% endfor %}];
+
+        // Données pour les paiements
+        const paiementsLabels = [{% for p in paiements %}'{{ p["mode_paiement"] or "Non spécifié" }}'{% if not loop.last %}, {% endif %}{% endfor %}];
+        const paiementsData = [{% for p in paiements %}{{ p["nb"] }}{% if not loop.last %}, {% endif %}{% endfor %}];
+
+        // Graphique des plats (barres)
+        new Chart(document.getElementById('topPlatsChart'), {
+            type: 'bar',
+            data: {
+                labels: topPlatsLabels,
+                datasets: [{
+                    label: 'Quantité vendue',
+                    data: topPlatsData,
+                    backgroundColor: '#ff9900',
+                    borderColor: '#c72a2a',
+                    borderWidth: 1
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true } } }
+        });
+
+        // Graphique des paiements (camembert)
+        new Chart(document.getElementById('paiementsChart'), {
+            type: 'pie',
+            data: {
+                labels: paiementsLabels,
+                datasets: [{
+                    data: paiementsData,
+                    backgroundColor: ['#c72a2a', '#ff9900', '#27ae60', '#3498db']
+                }]
+            }
+        });
+    </script>
+</body>
+</html>

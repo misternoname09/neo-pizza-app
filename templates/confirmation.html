@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmation - Néo Pizza</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .confirmation-box {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            margin: 50px auto;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .checkmark {
+            font-size: 80px;
+            color: #27ae60;
+            margin-bottom: 20px;
+        }
+        .btn-retour {
+            display: inline-block;
+            background-color: #c72a2a;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="confirmation-box">
+        <div class="checkmark">✓</div>
+        <h1>Merci pour votre commande !</h1>
+        <p>Votre commande n°{{ commande['id'] }} a été enregistrée.</p>
+        <p>Total : <strong>{{ commande['total'] }} FCFA</strong></p>
+        <p>Mode de paiement : {{ commande['mode_paiement'].replace('_', ' ') }}</p>
+        <p>Un serveur viendra vous apporter vos plats.</p>
+        <a href="{{ url_for('menu', restaurant_id=restaurant_id, table_id=table_id) }}" class="btn-retour">
+    Retour au menu
+</a>
+    </div>
+</body>
+</html>

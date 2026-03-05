@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gestion des catégories</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .container { max-width: 600px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #c72a2a; color: white; }
+        .btn { padding: 5px 10px; border: none; border-radius: 3px; text-decoration: none; color: white; }
+        .btn-ajouter { background-color: #27ae60; }
+        .btn-modifier { background-color: #ff9900; }
+        .btn-supprimer { background-color: #c72a2a; }
+    </style>
+</head>
+<body>
+    <div class="resto-info">
+        <h1>Gestion des catégories</h1>
+        <p><a href="/dashboard" style="color: white;">← Retour au tableau de bord</a></p>
+    </div>
+    <div class="container">
+        <h2>Liste des catégories</h2>
+        <form action="/ajouter_categorie" method="post" style="margin-bottom: 20px;">
+            <input type="text" name="nom" placeholder="Nouvelle catégorie" required>
+            <button type="submit" class="btn btn-ajouter">Ajouter</button>
+        </form>
+        <table>
+            <tr>
+                <th>Nom</th>
+                <th>Actions</th>
+            </tr>
+            {% for cat in categories %}
+            <tr>
+                <td>{{ cat['nom'] }}</td>
+                <td>
+                    <a href="/modifier_categorie/{{ cat['id'] }}" class="btn btn-modifier">Modifier</a>
+                    <a href="/supprimer_categorie/{{ cat['id'] }}" class="btn btn-supprimer" onclick="return confirm('Supprimer cette catégorie ?')">Supprimer</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>

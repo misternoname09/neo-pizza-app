@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Néo Pizza</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .login-container h1 {
+            color: #c72a2a;
+            margin-bottom: 30px;
+        }
+        .login-container input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .login-container button {
+            background-color: #c72a2a;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .login-container button:hover {
+            background-color: #a02020;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .resto-info-mini {
+            background-color: #c72a2a;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="resto-info-mini">
+            <h2>Néo Pizza - Administration</h2>
+        </div>
+        <h1>Connexion</h1>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+        <form method="post">
+            <!-- Champ caché pour le restaurant de Guédiawaye (ID 1) -->
+            <input type="hidden" name="restaurant_id" value="1">
+            <label for="password">Mot de passe :</label>
+            <input type="password" name="password" id="password" required>
+            <button type="submit">Se connecter</button>
+        </form>
+    </div>
+</body>
+</html>

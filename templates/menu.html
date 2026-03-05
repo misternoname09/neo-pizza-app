@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ restaurant['nom'] }} - Menu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f8f8;
+        }
+
+        .resto-header {
+            background-color: #c72a2a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .resto-header h1 {
+            font-size: 2.5em;
+            margin: 0;
+        }
+
+        .resto-header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .categorie {
+            font-size: 2em;
+            color: #c72a2a;
+            border-bottom: 3px solid #ff9900;
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+        }
+
+        .plats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .plat-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .plat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .plat-image {
+            height: 200px;
+            background-color: #eee;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .plat-info {
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        .plat-nom {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #c72a2a;
+            margin-bottom: 5px;
+        }
+
+        .plat-description {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .plat-prix {
+            font-weight: bold;
+            color: #ff9900;
+            font-size: 1.2em;
+        }
+
+        .plat-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #eee;
+        }
+
+        .quantite {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quantite input {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .btn-ajouter {
+            background-color: #ff9900;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .btn-ajouter:hover {
+            background-color: #e68a00;
+        }
+
+        .btn-commander {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 30px auto;
+            background-color: #c72a2a;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+
+        .btn-commander:hover {
+            background-color: #a02020;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="resto-header">
+        <h1>{{ restaurant['nom'] }}</h1>
+        <p>{{ restaurant['adresse'] }} | {{ restaurant['telephone'] }}</p>
+    </div>
+
+    <div class="container">
+        <form action="{{ url_for('commander') }}" method="post">
+            <input type="hidden" name="restaurant_id" value="{{ restaurant['id'] }}">
+            <input type="hidden" name="table_id" value="{{ table_id }}">
+
+            {% for categorie, plats in plats_par_categorie.items() %}
+            <div class="categorie">{{ categorie }}</div>
+            <div class="plats-grid">
+                {% for plat in plats %}
+                <div class="plat-card">
+                    {% if plat['image_url'] %}
+                    {% if plat['image_url'].startswith('http') %}
+                    <div class="plat-image" style="background-image: url('{{ plat['image_url'] }}');"></div>
+                    {% else %}
+                    <div class="plat-image"
+                        style="background-image: url('{{ url_for('static', filename=plat['image_url']) }}');"></div>
+                    {% endif %}
+                    {% else %}
+                    <div class="plat-image"
+                        style="background-color: #ddd; display: flex; align-items: center; justify-content: center; color: #999;">
+                        Pas d'image</div>
+                    {% endif %}
+                    <div class="plat-info">
+                        <div class="plat-nom">{{ plat['nom'] }}</div>
+                        <div class="plat-description">{{ plat['description'] }}</div>
+                        <div class="plat-prix">{{ plat['prix'] }} FCFA</div>
+                    </div>
+                    <div class="plat-actions">
+                        <div class="quantite">
+                            <label for="quantite_{{ plat['id'] }}">Qté:</label>
+                            <input type="number" name="quantite_{{ plat['id'] }}" id="quantite_{{ plat['id'] }}"
+                                value="1" min="1">
+                        </div>
+                        <input type="checkbox" name="plats" value="{{ plat['id'] }}" id="plat_{{ plat['id'] }}">
+                        <button type="button" class="btn-ajouter"
+                            onclick="document.getElementById('plat_{{ plat['id'] }}').checked = true;">Ajouter</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn-commander">Passer la commande</button>
+        </form>
+    </div>
+
+    <footer>
+        <p>© Néo Pizza - Tous droits réservés</p>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gestion des plats</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #c72a2a; color: white; }
+        .btn { padding: 5px 10px; text-decoration: none; border-radius: 3px; }
+        .btn-ajouter { background-color: #27ae60; color: white; }
+        .btn-modifier { background-color: #ff9900; color: white; }
+        .btn-supprimer { background-color: #c72a2a; color: white; }
+        img { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Gestion du menu</h1>
+    <a href="/dashboard/plat/ajouter" class="btn btn-ajouter">➕ Ajouter un plat</a>
+    <br><br>
+    {% for categorie, plats in plats_par_categorie.items() %}
+        <h2>{{ categorie }}</h2>
+        <table>
+            <tr>
+                <th>Image</th>
+                <th>Nom</th>
+                <th>Description</th>
+                <th>Prix</th>
+                <th>Actions</th>
+            </tr>
+            {% for plat in plats %}
+            <tr>
+                <td>
+    {% if plat['image'] %}
+        <img src="{{ url_for('static', filename='uploads/' + plat['image']) }}" alt="{{ plat['nom'] }}" style="width: 50px; height: 50px; object-fit: cover;">
+    {% else %}
+        <span style="color:#999;">Aucune</span>
+    {% endif %}
+</td>
+               <td>
+    {% if plat['image_url'] %}
+        {% if plat['image_url'].startswith('http') %}
+            <img src="{{ plat['image_url'] }}" alt="{{ plat['nom'] }}" style="width:50px; height:50px; object-fit:cover;">
+        {% else %}
+            <img src="{{ url_for('static', filename=plat['image_url']) }}" alt="{{ plat['nom'] }}" style="width:50px; height:50px; object-fit:cover;">
+        {% endif %}
+    {% else %}
+        <span style="color:#999;">Aucune</span>
+    {% endif %}
+</td>
+                
+                <td>{{ plat.nom }}</td>
+                <td>{{ plat.description }}</td>
+                <td>{{ plat.prix }} FCFA</td>
+                <td>
+                    <a href="/dashboard/plat/modifier/{{ plat.id }}" class="btn btn-modifier">Modifier</a>
+                    <a href="/dashboard/plat/supprimer/{{ plat.id }}" class="btn btn-supprimer" onclick="return confirm('Supprimer ce plat ?')">Supprimer</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
+</body>
+</html>

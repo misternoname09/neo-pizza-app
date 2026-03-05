@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Paiement - Néo Pizza</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .paiement-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 400px;
+            margin: 30px auto;
+        }
+        .option {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .option input[type="radio"] {
+            margin-right: 10px;
+        }
+        .btn-confirmer {
+            background-color: #c72a2a;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.2em;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .total {
+            font-size: 1.5em;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="resto-info">
+        <h1>Néo Pizza</h1>
+        <p>Choisissez votre mode de paiement</p>
+    </div>
+
+    <div class="total">
+        Total à payer : <strong>{{ commande['total'] }} FCFA</strong>
+    </div>
+
+    <form action="/payer" method="post" class="paiement-options">
+        <input type="hidden" name="commande_id" value="{{ commande['id'] }}">
+
+          <div class="option">
+    <input type="radio" name="mode" value="paytech" id="paytech" required>
+    <label for="paytech"><strong>PAYTECH</strong> (Orange Money, Wave, etc.)</label>
+</div>
+
+        <div class="option">
+            <input type="radio" name="mode" value="especes" id="cash">
+            <label for="cash"><strong>Espèces</strong> (paiement à la caisse)</label>
+        </div>
+
+        <button type="submit" class="btn-confirmer">Confirmer le paiement</button>
+    </form>
+
+
+    <footer>
+        <p>Néo Pizza - Guédiawaye</p>
+    </footer>
+</body>
+</html>

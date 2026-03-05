@@ -1,0 +1,118 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+.resto-info {
+    background-color: #c72a2a; /* rouge pizza */
+    color: white;
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.resto-info h1 {
+    margin: 0;
+    font-size: 2.5em;
+}
+
+.resto-info p {
+    margin: 5px 0 0;
+    font-size: 1.2em;
+}
+
+.categorie {
+    background-color: #ff9900; /* orange */
+    color: white;
+    padding: 10px 20px;
+    margin: 20px 0 10px;
+    border-radius: 5px;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.plat {
+    background-color: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.plat-info {
+    flex: 2;
+}
+
+.plat-nom {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #c72a2a;
+}
+
+.plat-description {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+}
+
+.plat-prix {
+    font-weight: bold;
+    color: #ff9900;
+    font-size: 1.2em;
+    margin-left: 20px;
+    min-width: 80px;
+    text-align: right;
+}
+
+.quantite {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.quantite input[type="number"] {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.quantite input[type="checkbox"] {
+    transform: scale(1.2);
+    margin-right: 5px;
+}
+
+.btn-commander {
+    background-color: #c72a2a;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    margin-top: 30px;
+    transition: background-color 0.3s;
+}
+
+.btn-commander:hover {
+    background-color: #a02020;
+}
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    color: #999;
+}

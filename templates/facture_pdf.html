@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        h1 { color: #c72a2a; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .total { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Néo Pizza - Facture</h1>
+    <p>Commande #{{ commande['id'] }} - Table {{ commande['table_num'] }}</p>
+    <p>Date : {{ commande['date_creation'] }}</p>
+    
+    <table>
+        <tr>
+            <th>Plat</th>
+            <th>Quantité</th>
+            <th>Prix unitaire</th>
+            <th>Total</th>
+        </tr>
+        {% for detail in details %}
+        <tr>
+            <td>{{ detail['nom'] }}</td>
+            <td>{{ detail['quantite'] }}</td>
+            <td>{{ detail['prix'] }} FCFA</td>
+            <td>{{ detail['quantite'] * detail['prix'] }} FCFA</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <p class="total">Total : {{ commande['total'] }} FCFA</p>
+    <p>Mode de paiement : {{ commande['mode_paiement'] or 'Non défini' }}</p>
+</body>
+</html>

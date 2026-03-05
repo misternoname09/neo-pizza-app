@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% if plat %}Modifier{% else %}Ajouter{% endif %} un plat - Néo Pizza</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .form-container { max-width: 600px; margin: 30px auto; background: white; padding: 20px; border-radius: 8px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input[type="text"], input[type="number"], input[type="url"], textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        textarea { height: 100px; }
+        .btn {
+            background-color: #c72a2a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-annuler {
+            background-color: #666;
+            text-decoration: none;
+            display: inline-block;
+            padding: 10px 20px;
+            margin-left: 10px;
+            color: white;
+        }
+        .current-image img {
+            max-width: 150px;
+            max-height: 150px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .preview { display: none; margin-top: 10px; }
+        .preview img { max-width: 150px; max-height: 150px; border: 1px solid #ccc; border-radius: 4px; }
+        hr { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="resto-info">
+        <h1>{% if plat %}Modifier{% else %}Ajouter{% endif %} un plat</h1>
+    </div>
+    <div class="form-container">
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="nom">Nom du plat</label>
+                <input type="text" name="nom" id="nom" value="{{ plat['nom'] if plat else '' }}" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea name="description" id="description">{{ plat['description'] if plat else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="prix">Prix (FCFA)</label>
+                <input type="number" name="prix" id="prix" value="{{ plat['prix'] if plat else '' }}" step="10" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="categorie_id">Catégorie</label>
+                <select name="categorie_id" id="categorie_id" required>
+                    {% for categorie in categories %}
+                        <option value="{{ categorie['id'] }}" {% if plat and plat['categorie_id'] == categorie['id'] %}selected{% endif %}>{{ categorie['nom'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            
+            <h3>Image du plat</h3>
+
+            <!-- Affichage de l'image actuelle si elle existe -->
+            {% if plat and plat['image_url'] %}
+                <div class="current-image">
+                    <p><strong>Image actuelle :</strong></p>
+                    {% if plat['image_url'].startswith('http') %}
+                        <img src="{{ plat['image_url'] }}" alt="{{ plat['nom'] }}">
+                    {% else %}
+                        <img src="{{ url_for('static', filename=plat['image_url']) }}" alt="{{ plat['nom'] }}">
+                    {% endif %}
+                    <label>
+                        <input type="checkbox" name="remove_image"> Supprimer cette image
+                    </label>
+                </div>
+                <hr>
+            {% endif %}
+
+            <!-- Option 1 : Upload d'un fichier -->
+            <div class="form-group">
+                <label for="image_file">Uploader une image depuis votre ordinateur</label>
+                <input type="file" name="image_file" id="image_file" accept="image/png, image/jpeg, image/jpg, image/gif">
+                <div class="preview" id="filePreview"></div>
+            </div>
+
+            <!-- Option 2 : URL d'une image externe -->
+            <div class="form-group">
+                <label for="image_url">Ou spécifier une URL d'image</label>
+                <input type="url" name="image_url" id="image_url" placeholder="https://exemple.com/image.jpg">
+                <div class="preview" id="urlPreview"></div>
+            </div>
+
+            <button type="submit" class="btn">Enregistrer</button>
+            <a href="{{ url_for('gestion_plats') }}" class="btn-annuler">Annuler</a>
+        </form>
+    </div>
+
+    <script>
+        // Aperçu pour l'upload de fichier
+        document.getElementById('image_file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const preview = document.getElementById('filePreview');
+                    preview.innerHTML = '<img src="' + event.target.result + '" alt="Aperçu">';
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById('filePreview').style.display = 'none';
+            }
+        });
+
+        // Aperçu pour l'URL
+        document.getElementById('image_url').addEventListener('input', function(e) {
+            const url = e.target.value;
+            const preview = document.getElementById('urlPreview');
+            if (url) {
+                preview.innerHTML = '<img src="' + url + '" alt="Aperçu" onerror="this.style.display=\'none\';">';
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

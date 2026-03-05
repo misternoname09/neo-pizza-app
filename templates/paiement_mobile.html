@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Paiement mobile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="resto-info">
+        <h1>Paiement {{ mode.replace('_', ' ') }}</h1>
+    </div>
+    <div class="form-container">
+        <form action="{{ url_for('payer_mobile') }}" method="post">
+            <input type="hidden" name="commande_id" value="{{ commande_id }}">
+            <input type="hidden" name="mode" value="{{ mode }}">
+            
+            <div class="form-group">
+                <label for="telephone">Numéro de téléphone</label>
+                <input type="tel" name="telephone" id="telephone" 
+                       placeholder="77 123 45 67" required>
+            </div>
+            
+            <div class="info-paiement">
+                <p>Vous allez être redirigé vers la plateforme sécurisée de 
+                   <strong>{{ mode.replace('_', ' ') }}</strong>.</p>
+                <p>Montant : <strong>{{ commande['total'] }} FCFA</strong></p>
+            </div>
+            
+            <button type="submit" class="btn-payer">Procéder au paiement</button>
+        </form>
+    </div>
+</body>
+</html>
