@@ -6,7 +6,7 @@ import tempfile
 import subprocess
 import uuid
 import json
-import requests  # <-- AJOUTÉ (manquait)
+import requests  # <-- AJOUTE (manquait)
 from io import BytesIO
 
 from werkzeug.utils import secure_filename
@@ -866,3 +866,4 @@ def notifier_client(commande_id):
 # -------------------- Lancement de l'application --------------------
 if __name__ == '__main__':
     app.run(debug=True)
+
