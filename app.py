@@ -69,7 +69,7 @@ def initier_paiement_paytech(montant, telephone, commande_id, description="Comma
         'currency': 'XOF',
         'ref_command': ref_unique,               # Référence unique
         'command_name': description[:100],
-        'env': os.environ.get('PAYTECH_ENV', 'test'),
+        'env': 'test',  # <-- MODIFICATION : forcé en mode test (en attendant activation)
         'ipn_url': url_for('paytech_webhook', _external=True),
         'success_url': url_for('confirmation', commande_id=commande_id, _external=True),
         'cancel_url': url_for('paiement_erreur', commande_id=commande_id, _external=True)
