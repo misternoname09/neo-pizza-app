@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +16,8 @@
 
         body {
             font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #faf3e8;  /* Fond chaud */
+            background: #faf3e8;
+            /* Fond chaud */
             color: #2d2d2d;
             line-height: 1.6;
         }
@@ -26,7 +28,7 @@
             color: white;
             padding: 40px 20px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             position: relative;
             overflow: hidden;
         }
@@ -47,7 +49,7 @@
             margin: 0;
             font-weight: 700;
             letter-spacing: -0.5px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .resto-header p {
@@ -108,16 +110,16 @@
             background: white;
             border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
-            border: 1px solid rgba(199,42,42,0.1);
+            border: 1px solid rgba(199, 42, 42, 0.1);
         }
 
         .plat-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 20px 35px rgba(199,42,42,0.15);
+            box-shadow: 0 20px 35px rgba(199, 42, 42, 0.15);
             border-color: #c72a2a;
         }
 
@@ -206,7 +208,7 @@
 
         .quantite input:focus {
             border-color: #c72a2a;
-            box-shadow: 0 0 0 3px rgba(199,42,42,0.1);
+            box-shadow: 0 0 0 3px rgba(199, 42, 42, 0.1);
         }
 
         /* Checkbox invisible mais fonctionnelle */
@@ -227,7 +229,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 10px rgba(199,42,42,0.3);
+            box-shadow: 0 4px 10px rgba(199, 42, 42, 0.3);
         }
 
         .btn-ajouter i {
@@ -237,7 +239,7 @@
         .btn-ajouter:hover {
             background: linear-gradient(145deg, #b82424, #8e1c1c);
             transform: scale(1.05);
-            box-shadow: 0 6px 15px rgba(199,42,42,0.4);
+            box-shadow: 0 6px 15px rgba(199, 42, 42, 0.4);
         }
 
         /* Bouton de commande global */
@@ -256,8 +258,8 @@
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(255,153,0,0.4);
-            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 10px 25px rgba(255, 153, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(5px);
             letter-spacing: 1px;
             display: flex;
@@ -273,7 +275,7 @@
         .btn-commander:hover {
             background: linear-gradient(145deg, #ffaa1a, #cc7a00);
             transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(255,153,0,0.5);
+            box-shadow: 0 15px 30px rgba(255, 153, 0, 0.5);
         }
 
         .btn-commander:active {
@@ -299,17 +301,21 @@
             .resto-header h1 {
                 font-size: 2.2rem;
             }
+
             .categorie {
                 font-size: 1.8rem;
             }
+
             .plats-grid {
                 grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
                 gap: 20px;
             }
+
             .plat-actions {
                 flex-wrap: wrap;
                 gap: 10px;
             }
+
             .btn-commander {
                 font-size: 1.2rem;
                 padding: 15px 25px;
@@ -321,12 +327,14 @@
                 flex-direction: column;
                 gap: 5px;
             }
+
             .plat-image {
                 height: 180px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="resto-header">
         <h1>{{ restaurant['nom'] }}</h1>
@@ -342,44 +350,48 @@
             <input type="hidden" name="table_id" value="{{ table_id }}">
 
             {% for categorie, plats in plats_par_categorie.items() %}
-                <div class="categorie">{{ categorie }}</div>
-                <div class="plats-grid">
-                    {% for plat in plats %}
-                        <div class="plat-card">
-                            <!-- Image -->
-                            {% if plat['image_url'] %}
-                                {% if plat['image_url'].startswith('http') %}
-                                    <div class="plat-image" style="background-image: url('{{ plat['image_url'] }}');"></div>
-                                {% else %}
-                                    <div class="plat-image" style="background-image: url('{{ url_for('static', filename=plat['image_url']) }}');"></div>
-                                {% endif %}
-                            {% else %}
-                                <div class="plat-image" style="background: #e0e0e0; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-image" style="font-size: 3rem; color: #999;"></i>
-                                </div>
-                            {% endif %}
+            <div class="categorie">{{ categorie }}</div>
+            <div class="plats-grid">
+                {% for plat in plats %}
+                <div class="plat-card">
+                    <!-- Image -->
+                    {% if plat['image_url'] %}
+                    {% if plat['image_url'].startswith('http') %}
+                    <div class="plat-image" style="background-image: url('{{ plat['image_url'] }}');"></div>
+                    {% else %}
+                    <div class="plat-image"
+                        style="background-image: url('{{ url_for('static', filename=plat['image_url']) }}');"></div>
+                    {% endif %}
+                    {% else %}
+                    <div class="plat-image"
+                        style="background: #e0e0e0; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-image" style="font-size: 3rem; color: #999;"></i>
+                    </div>
+                    {% endif %}
 
-                            <!-- Infos -->
-                            <div class="plat-info">
-                                <div class="plat-nom">{{ plat['nom'] }}</div>
-                                <div class="plat-description">{{ plat['description'] }}</div>
-                                <div class="plat-prix">{{ plat['prix'] }} FCFA</div>
-                            </div>
+                    <!-- Infos -->
+                    <div class="plat-info">
+                        <div class="plat-nom">{{ plat['nom'] }}</div>
+                        <div class="plat-description">{{ plat['description'] }}</div>
+                        <div class="plat-prix">{{ plat['prix'] }} FCFA</div>
+                    </div>
 
-                            <!-- Actions -->
-                            <div class="plat-actions">
-                                <div class="quantite">
-                                    <label for="quantite_{{ plat['id'] }}">Qté</label>
-                                    <input type="number" name="quantite_{{ plat['id'] }}" id="quantite_{{ plat['id'] }}" value="1" min="1">
-                                </div>
-                                <input type="checkbox" name="plats" value="{{ plat['id'] }}" id="plat_{{ plat['id'] }}">
-                                <button type="button" class="btn-ajouter" onclick="document.getElementById('plat_{{ plat['id'] }}').checked = true;">
-                                    <i class="fas fa-cart-plus"></i> Ajouter
-                                </button>
-                            </div>
+                    <!-- Actions -->
+                    <div class="plat-actions">
+                        <div class="quantite">
+                            <label for="quantite_{{ plat['id'] }}">Qté</label>
+                            <input type="number" name="quantite_{{ plat['id'] }}" id="quantite_{{ plat['id'] }}"
+                                value="0" min="0">
                         </div>
-                    {% endfor %}
+                        <input type="checkbox" name="plats" value="{{ plat['id'] }}" id="plat_{{ plat['id'] }}">
+                        <button type="button" class="btn-ajouter"
+                            onclick="document.getElementById('plat_{{ plat['id'] }}').checked = true;">
+                            <i class="fas fa-cart-plus"></i> Ajouter
+                        </button>
+                    </div>
                 </div>
+                {% endfor %}
+            </div>
             {% endfor %}
 
             <button type="submit" class="btn-commander">
@@ -393,4 +405,5 @@
         <p><i class="fas fa-pizza-slice"></i> © {{ restaurant['nom'] }} - Tous droits réservés</p>
     </footer>
 </body>
+
 </html>
