@@ -4,165 +4,626 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de bord - Néo Pizza</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts pour une typographie moderne -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f4f4f4; }
-        .dashboard-header {
-            background-color: #c72a2a;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.5;
+        }
+
+        /* Layout principal */
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #c72a2a 0%, #a02020 100%);
             color: white;
-            padding: 20px;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 15px 0 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .logo i {
+            font-size: 3rem;
+            color: #c72a2a;
+        }
+
+        .nav-links {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-links li {
+            margin-bottom: 5px;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a i {
+            width: 24px;
+            font-size: 1.2rem;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-links a.active {
+            background: rgba(255,255,255,0.25);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-footer {
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            background: #ff9900;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .user-name {
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* Contenu principal */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        /* En-tête du contenu */
+        .content-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
-        .dashboard-header h1 { margin: 0; }
-        .dashboard-header a {
-            color: white;
-            text-decoration: none;
-            background-color: #333;
+
+        .content-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .btn-logout {
+            background: #f1f5f9;
+            color: #1e293b;
             padding: 10px 20px;
-            border-radius: 5px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+            border: 1px solid #e2e8f0;
         }
-        .commandes-table {
+
+        .btn-logout:hover {
+            background: #e2e8f0;
+        }
+
+        /* Cartes de statistiques */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid #e9edf2;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            background: #fee2e2;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #c72a2a;
+            font-size: 1.8rem;
+        }
+
+        .stat-content h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .stat-content p {
+            color: #64748b;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* Filtres */
+        .filter-section {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e9edf2;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        select, button {
+            padding: 10px 15px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        select:focus, button:focus {
+            border-color: #c72a2a;
+            box-shadow: 0 0 0 3px rgba(199,42,42,0.1);
+        }
+
+        button {
+            background: #c72a2a;
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 10px 25px;
+        }
+
+        button:hover {
+            background: #b02020;
+        }
+
+        .btn-excel {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            margin-left: auto;
+        }
+
+        .btn-excel:hover {
+            background: #219a52;
+        }
+
+        /* Tableau */
+        .table-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e9edf2;
+            overflow-x: auto;
+        }
+
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
-            background-color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .commandes-table th, .commandes-table td {
-            padding: 12px;
+
+        th {
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            padding: 15px 10px;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
         }
-        .commandes-table th { background-color: #333; color: white; }
-        .commandes-table tr:hover { background-color: #f5f5f5; }
-        .statut {
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 20px;
-            color: white;
+
+        td {
+            padding: 15px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: #fafafa;
+        }
+
+        /* Badges de statut */
+        .statut-badge {
             display: inline-block;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: center;
+            min-width: 100px;
         }
-        .statut.en_attente { background-color: #f39c12; }
-        .statut.en_préparation { background-color: #3498db; }
-        .statut.prête { background-color: #27ae60; }
-        .statut.payée { background-color: #95a5a6; }
-        .btn {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            margin: 2px;
-        }
-        .btn-detail {
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            padding: 5px 10px;
-            border-radius: 3px;
-        }
-        .btn-changer { background-color: #f39c12; color: white; }
-        .actions form { display: inline; }
-        .filter-bar {
-            margin: 20px 0;
-            padding: 0 20px;
-        }
-        .filter-bar select, .filter-bar button { padding: 8px; margin-right: 10px; }
-        .action-buttons {
+
+        .statut.en_attente { background: #fef3c7; color: #b45309; }
+        .statut.en_préparation { background: #dbeafe; color: #1e40af; }
+        .statut.prête { background: #d1fae5; color: #065f46; }
+        .statut.payée { background: #e2e8f0; color: #334155; }
+
+        /* Boutons d'action */
+        .action-group {
             display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-bottom: 20px;
-            padding: 0 20px;
+            gap: 8px;
+            flex-wrap: wrap;
         }
-        .action-buttons a {
-            padding: 10px 20px;
+
+        .btn-action {
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.2s;
             text-decoration: none;
-            border-radius: 5px;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .btn-action i {
+            font-size: 0.9rem;
+        }
+
+        .btn-action:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-changer {
+            background: #f39c12;
             color: white;
         }
-        .btn-menu { background-color: #27ae60; }
-        .btn-stats { background-color: #3498db; }
-        .btn-categories { background-color: #e67e22; }
+
+        .btn-changer:hover {
+            background: #e08e0b;
+        }
+
+        .btn-detail {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-detail:hover {
+            background: #2980b9;
+        }
+
+        /* Petit formulaire inline */
+        .inline-form {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .inline-form select {
+            padding: 6px 8px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        /* Aucune commande */
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .app {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                padding: 20px;
+            }
+            .main-content {
+                padding: 20px;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn-excel {
+                margin-left: 0;
+            }
+            .action-group {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="dashboard-header">
-        <h1>Tableau de bord - Néo Pizza</h1>
-        <a href="{{ url_for('logout') }}">Déconnexion</a>
-    </div>
-<br>
-    <!-- Boutons d'action -->
-    <div class="action-buttons">
-        <a href="/dashboard/menu" class="btn-menu">Gérer le menu</a>
-        <a href="/dashboard/stats" class="btn-stats">📊 Statistiques</a>
-        <a href="/categories" class="btn-categories">Gérer les catégories</a>
-    </div>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-pizza-slice"></i>
+                </div>
+                <h2>Néo Pizza</h2>
+                <p>Guédiawaye</p>
+            </div>
 
-    <!-- Filtre par statut -->
-    <div class="filter-bar">
-        <form method="get" action="{{ url_for('dashboard') }}">
-            <label for="statut">Filtrer par statut :</label>
-            <select name="statut" id="statut">
-                <option value="tous" {% if filtre == 'tous' %}selected{% endif %}>Toutes les commandes</option>
-                <option value="en attente" {% if filtre == 'en attente' %}selected{% endif %}>En attente</option>
-                <option value="en préparation" {% if filtre == 'en préparation' %}selected{% endif %}>En préparation</option>
-                <option value="prête" {% if filtre == 'prête' %}selected{% endif %}>Prête</option>
-                <option value="payée" {% if filtre == 'payée' %}selected{% endif %}>Payée</option>
-            </select>
-            <button type="submit">Filtrer</button>
-        </form>
-    </div>
-<a href="/kitchen" style="background-color: #e67e22; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">👨‍🍳 Vue cuisine</a>
-    <h2 style="text-align: center; margin: 20px 0;">Liste des commandes</h2>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('dashboard') }}" class="active"><i class="fas fa-home"></i> Tableau de bord</a></li>
+                <li><a href="/dashboard/menu"><i class="fas fa-utensils"></i> Gérer le menu</a></li>
+                <li><a href="/categories"><i class="fas fa-tags"></i> Catégories</a></li>
+                <li><a href="/dashboard/stats"><i class="fas fa-chart-line"></i> Statistiques</a></li>
+                <li><a href="/kitchen"><i class="fas fa-kitchen-set"></i> Vue cuisine</a></li>
+            </ul>
 
-<div style="margin-top: 20px;">
-    <a href="/export/excel" style="background-color: #27ae60; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">📊 Export Excel</a>
-</div>
-    <table class="commandes-table">
-        <thead>
-            <tr>
-                <th>N° commande</th>
-                <th>Table</th>
-                <th>Total (FCFA)</th>
-                <th>Statut</th>
-                <th>Mode paiement</th>
-                <th>Date</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for cmd in commandes %}
-            <tr>
-                <td>#{{ cmd['id'] }}</td>
-                <td>{{ cmd['table_num'] }}</td>
-                <td>{{ cmd['total'] }} FCFA</td>
-                <td>
-                    <span class="statut {{ cmd['statut'].replace(' ', '_') }}">{{ cmd['statut'] }}</span>
-                </td>
-                <td>{{ cmd['mode_paiement'] if cmd['mode_paiement'] else 'Non défini' }}</td>
-                <td>{{ cmd['date_creation'] }}</td>
-                <td class="actions">
-                    <a href="{{ url_for('detail_commande', commande_id=cmd['id']) }}" class="btn-detail">Détails</a>
-                    <form action="{{ url_for('changer_statut') }}" method="post" style="display:inline;">
-                        <input type="hidden" name="commande_id" value="{{ cmd['id'] }}">
-                        <select name="nouveau_statut">
-                            <option value="en attente" {% if cmd['statut'] == 'en attente' %}selected{% endif %}>En attente</option>
-                            <option value="en préparation" {% if cmd['statut'] == 'en préparation' %}selected{% endif %}>En préparation</option>
-                            <option value="prête" {% if cmd['statut'] == 'prête' %}selected{% endif %}>Prête</option>
-                            <option value="payée" {% if cmd['statut'] == 'payée' %}selected{% endif %}>Payée</option>
-                        </select>
-                        <button type="submit" class="btn btn-changer">Changer</button>
-                    </form>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="7" style="text-align:center;">Aucune commande trouvée.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">A</div>
+                    <div>
+                        <div class="user-name">Admin</div>
+                        <div class="user-role">Gérant</div>
+                    </div>
+                </div>
+                <a href="{{ url_for('logout') }}" class="btn-logout" style="color: white; border-color: rgba(255,255,255,0.3);">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </a>
+            </div>
+        </aside>
+
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <div class="content-header">
+                <h1>Tableau de bord</h1>
+                <a href="{{ url_for('logout') }}" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </a>
+            </div>
+
+            <!-- Cartes de statistiques -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
+                    <div class="stat-content">
+                        <h3>{{ commandes|length }}</h3>
+                        <p>Commandes totales</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fef3c7; color:#b45309;"><i class="fas fa-clock"></i></div>
+                    <div class="stat-content">
+                        <h3>{{ commandes|selectattr('statut', 'equalto', 'en attente')|list|length }}</h3>
+                        <p>En attente</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #dbeafe; color:#1e40af;"><i class="fas fa-fire"></i></div>
+                    <div class="stat-content">
+                        <h3>{{ commandes|selectattr('statut', 'equalto', 'en préparation')|list|length }}</h3>
+                        <p>En préparation</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #d1fae5; color:#065f46;"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-content">
+                        <h3>{{ commandes|selectattr('statut', 'equalto', 'prête')|list|length }}</h3>
+                        <p>Prêtes</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #f1f5f9; color:#334155;"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-content">
+                        <h3>{{ commandes|selectattr('statut', 'equalto', 'payée')|list|length }}</h3>
+                        <p>Payées</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barre de filtre et actions -->
+            <div class="filter-section">
+                <form method="get" action="{{ url_for('dashboard') }}" class="filter-group">
+                    <label for="statut"><i class="fas fa-filter"></i> Filtrer :</label>
+                    <select name="statut" id="statut">
+                        <option value="tous" {% if filtre == 'tous' %}selected{% endif %}>Toutes</option>
+                        <option value="en attente" {% if filtre == 'en attente' %}selected{% endif %}>En attente</option>
+                        <option value="en préparation" {% if filtre == 'en préparation' %}selected{% endif %}>En préparation</option>
+                        <option value="prête" {% if filtre == 'prête' %}selected{% endif %}>Prête</option>
+                        <option value="payée" {% if filtre == 'payée' %}selected{% endif %}>Payée</option>
+                    </select>
+                    <button type="submit"><i class="fas fa-search"></i> Appliquer</button>
+                </form>
+
+                <a href="/export/excel" class="btn-excel">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </a>
+            </div>
+
+            <!-- Liste des commandes -->
+            <div class="table-container">
+                <h2 style="margin-bottom: 20px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-list"></i> Liste des commandes
+                </h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>Table</th>
+                            <th>Total</th>
+                            <th>Statut</th>
+                            <th>Paiement</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cmd in commandes %}
+                        <tr>
+                            <td><strong>#{{ cmd['id'] }}</strong></td>
+                            <td>{{ cmd['table_num'] }}</td>
+                            <td><strong>{{ cmd['total'] }} FCFA</strong></td>
+                            <td>
+                                <span class="statut-badge statut {{ cmd['statut'].replace(' ', '_') }}">
+                                    {{ cmd['statut'] }}
+                                </span>
+                            </td>
+                            <td>{{ cmd['mode_paiement'] if cmd['mode_paiement'] else '—' }}</td>
+                            <td>{{ cmd['date_creation'] }}</td>
+                            <td>
+                                <div class="action-group">
+                                    <a href="{{ url_for('detail_commande', commande_id=cmd['id']) }}" class="btn-action btn-detail">
+                                        <i class="fas fa-eye"></i> Détails
+                                    </a>
+                                    <form action="{{ url_for('changer_statut') }}" method="post" class="inline-form">
+                                        <input type="hidden" name="commande_id" value="{{ cmd['id'] }}">
+                                        <select name="nouveau_statut" style="width: auto;">
+                                            <option value="en attente" {% if cmd['statut'] == 'en attente' %}selected{% endif %}>En attente</option>
+                                            <option value="en préparation" {% if cmd['statut'] == 'en préparation' %}selected{% endif %}>En préparation</option>
+                                            <option value="prête" {% if cmd['statut'] == 'prête' %}selected{% endif %}>Prête</option>
+                                            <option value="payée" {% if cmd['statut'] == 'payée' %}selected{% endif %}>Payée</option>
+                                        </select>
+                                        <button type="submit" class="btn-action btn-changer">
+                                            <i class="fas fa-sync-alt"></i> Changer
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="no-data">
+                                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                                Aucune commande trouvée.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
 </body>
 </html>
