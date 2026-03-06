@@ -6,7 +6,8 @@ import tempfile
 import subprocess
 import uuid
 import json
-import requests  # <-- AJOUTÉ (manquait)
+import requests
+import time
 from io import BytesIO
 
 from werkzeug.utils import secure_filename
@@ -46,24 +47,10 @@ twilio_auth_token = os.environ.get('TWILIO_AUTH_TOKEN', 'ton_auth_token')
 twilio_phone_number = os.environ.get('TWILIO_PHONE_NUMBER', '+1234567890')
 twilio_client = Client(twilio_account_sid, twilio_auth_token)
 
-# Configuration WeasyPrint (commentée car non utilisée en ligne pour l'instant)
-# WEASYPRINT_DLL_PATH = r'C:\msys64\ucrt64\bin'
-# if os.path.exists(WEASYPRINT_DLL_PATH):
-#     os.environ['WEASYPRINT_DLL_DIRECTORIES'] = WEASYPRINT_DLL_PATH
-#     try:
-#         os.add_dll_directory(WEASYPRINT_DLL_PATH)
-#     except AttributeError:
-#         pass
-# else:
-#     print(f"ERREUR : le dossier {WEASYPRINT_DLL_PATH} n'existe pas.")
-#     sys.exit(1)
-# from weasyprint import HTML
-# WEASYPRINT_EXE = r'C:\weasyprint\weasyprint.exe'  # chemin vers l'exécutable
-
 # -------------------- Configuration PAYTECH --------------------
 PAYTECH_API_KEY = os.environ.get('PAYTECH_API_KEY')
 PAYTECH_SECRET_KEY = os.environ.get('PAYTECH_SECRET_KEY')
-PAYTECH_BASE_URL = os.environ.get('PAYTECH_BASE_URL', 'https://paytech.sn/api')  # URL de base
+PAYTECH_BASE_URL = os.environ.get('PAYTECH_BASE_URL', 'https://paytech.sn/api')
 
 def initier_paiement_paytech(montant, telephone, commande_id, description="Commande Néo Pizza"):
     """Initie un paiement via PAYTECH et retourne l'URL de redirection."""
@@ -73,25 +60,26 @@ def initier_paiement_paytech(montant, telephone, commande_id, description="Comma
         'Content-Type': 'application/json'
     }
 
-    # Construction du payload selon la documentation
+    # Génération d'une référence unique (timestamp + commande_id)
+    ref_unique = f'CMD{commande_id}_{int(time.time())}'
+
     payload = {
-        'item_name': description[:50],              # Nom court du produit
-        'item_price': int(montant),                  # Prix en nombre (pas en string)
-        'currency': 'XOF',                           # Devise (optionnel, défaut XOF)
-        'ref_command': f'CMD{commande_id}',          # Référence unique
-        'command_name': description[:100],           # Description de la commande
-        'env': os.environ.get('PAYTECH_ENV', 'test'), # 'test' ou 'prod'
-        'ipn_url': url_for('paytech_webhook', _external=True),  # URL de notification
+        'item_name': description[:50],
+        'item_price': int(montant),
+        'currency': 'XOF',
+        'ref_command': ref_unique,               # Référence unique
+        'command_name': description[:100],
+        'env': os.environ.get('PAYTECH_ENV', 'test'),
+        'ipn_url': url_for('paytech_webhook', _external=True),
         'success_url': url_for('confirmation', commande_id=commande_id, _external=True),
         'cancel_url': url_for('paiement_erreur', commande_id=commande_id, _external=True)
     }
 
-    # Si un téléphone est fourni, on peut cibler une méthode de paiement
     if telephone:
         payload['target_payment'] = 'Orange Money, Wave, Free Money'
 
     try:
-        full_url = f"{PAYTECH_BASE_URL}/payment/request-payment"  # Endpoint corrigé
+        full_url = f"{PAYTECH_BASE_URL}/payment/request-payment"
         print(f"Envoi requête PAYTECH vers {full_url}")
         print(f"Payload: {payload}")
 
@@ -109,9 +97,7 @@ def initier_paiement_paytech(montant, telephone, commande_id, description="Comma
             data = response.json()
             if data.get('success') == 1:
                 token = data.get('token')
-                # L'URL de redirection est https://paytech.sn/payment/checkout/{token}
-                redirect_url = f"https://paytech.sn/payment/checkout/{token}"
-                return redirect_url
+                return f"https://paytech.sn/payment/checkout/{token}"
             else:
                 print("La requête n'a pas réussi (success != 1)")
                 return None
@@ -131,7 +117,8 @@ def paytech_webhook():
 
     ref_command = data.get('ref_command')
     if ref_command and ref_command.startswith('CMD'):
-        commande_id = ref_command[3:]
+        # Extraire l'ID de commande (format: CMD123_1234567890)
+        commande_id = ref_command.split('_')[0][3:]  # prend la partie avant le _
         if data.get('status') == 'completed':
             db = get_db()
             db.execute('UPDATE commandes SET statut = ?, mode_paiement = ? WHERE id = ?',
@@ -171,7 +158,6 @@ def login_required(view):
 def init_db():
     """Crée les tables et insère les données de base si elles n'existent pas."""
     db = get_db()
-    # Création des tables (selon votre schéma original)
     db.executescript('''
         CREATE TABLE IF NOT EXISTS restaurants (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -233,7 +219,6 @@ def init_db():
         for cat in categories:
             db.execute("INSERT INTO categories (nom, restaurant_id) VALUES (?, ?)", (cat, 1))
         # Ajouter quelques plats (vous pouvez compléter avec vos données)
-        # Exemple pour la catégorie PIZZA (à adapter)
         pizza_id = db.execute("SELECT id FROM categories WHERE nom = 'PIZZA' AND restaurant_id = 1").fetchone()['id']
         plats_pizza = [
             ("REINE DE MON CŒUR", "Mergeuz ou jambon, piment vert, fromage, sauce tomates", 4500, pizza_id),
@@ -244,7 +229,7 @@ def init_db():
                        (nom, desc, prix, cat_id))
         db.commit()
 
-# Appeler l'initialisation au démarrage (dans le contexte de l'application)
+# Appeler l'initialisation au démarrage
 with app.app_context():
     init_db()
 
@@ -273,7 +258,6 @@ def save_uploaded_image(file):
 # -------------------- Routes publiques (client) --------------------
 @app.route('/')
 def accueil():
-    # Valeurs par défaut : restaurant 1, table 1
     restaurant_id = 1
     table_id = 1
 
@@ -366,7 +350,6 @@ def payer():
         db.commit()
         return redirect(url_for('confirmation', commande_id=commande_id))
     else:
-        # Récupérer la commande pour afficher le montant
         commande = db.execute('SELECT * FROM commandes WHERE id = ?', (commande_id,)).fetchone()
         if not commande:
             return "Commande introuvable", 404
@@ -380,10 +363,14 @@ def payer_mobile():
     telephone = request.form['telephone']
     print(f"Mode reçu : {mode}")
 
-    commande = db.execute('SELECT total FROM commandes WHERE id = ?', (commande_id,)).fetchone()
+    # Vérifier que la commande existe et n'est pas déjà payée
+    commande = db.execute('SELECT total, statut FROM commandes WHERE id = ?', (commande_id,)).fetchone()
     if not commande:
         flash("Commande introuvable.", "danger")
         return redirect(url_for('accueil'))
+    if commande['statut'] == 'payée':
+        flash("Cette commande a déjà été payée.", "info")
+        return redirect(url_for('confirmation', commande_id=commande_id))
 
     if mode == 'paytech':
         payment_url = initier_paiement_paytech(commande['total'], telephone, commande_id)
@@ -396,7 +383,6 @@ def payer_mobile():
             db.commit()
             return redirect(url_for('confirmation', commande_id=commande_id))
     else:
-        # Fallback pour les autres modes (simulation)
         db.execute('UPDATE commandes SET mode_paiement = ?, statut = ? WHERE id = ?',
                    (mode, 'payée', commande_id))
         db.commit()
