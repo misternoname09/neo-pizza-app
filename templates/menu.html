@@ -242,7 +242,7 @@
             box-shadow: 0 6px 15px rgba(199, 42, 42, 0.4);
         }
 
-        /* Bouton de commande global */
+        /* Bouton de commande global (bas) */
         .btn-commander {
             display: block;
             width: 100%;
@@ -280,6 +280,38 @@
 
         .btn-commander:active {
             transform: translateY(0);
+        }
+
+        /* Nouveau style pour le bouton de commande en haut */
+        .btn-commander-top {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(145deg, #ff9900, #e68a00);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 153, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+
+        .btn-commander-top i {
+            font-size: 1.2rem;
+        }
+
+        .btn-commander-top:hover {
+            background: linear-gradient(145deg, #ffaa1a, #cc7a00);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 153, 0, 0.4);
         }
 
         /* Pied de page */
@@ -349,6 +381,13 @@
             <input type="hidden" name="restaurant_id" value="{{ restaurant['id'] }}">
             <input type="hidden" name="table_id" value="{{ table_id }}">
 
+            <!-- Bouton de commande en haut (visible immédiatement) -->
+            <div style="text-align: right;">
+                <button type="submit" class="btn-commander-top">
+                    <i class="fas fa-shopping-cart"></i> Passer la commande
+                </button>
+            </div>
+
             {% for categorie, plats in plats_par_categorie.items() %}
             <div class="categorie">{{ categorie }}</div>
             <div class="plats-grid">
@@ -394,6 +433,7 @@
             </div>
             {% endfor %}
 
+            <!-- Bouton de commande en bas (conservé) -->
             <button type="submit" class="btn-commander">
                 <i class="fas fa-check-circle"></i> Passer la commande
                 <i class="fas fa-arrow-right"></i>
