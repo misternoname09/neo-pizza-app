@@ -1,32 +1,238 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Paiement mobile</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement mobile - Néo Pizza</title>
+    <!-- Font Awesome pour les icônes (optionnel mais recommandé) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #c72a2a 0%, #ff9900 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            max-width: 450px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .header {
+            background: linear-gradient(145deg, #c72a2a, #a02020);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2em;
+            margin: 0 0 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .header h1 i {
+            font-size: 1.2em;
+        }
+        .header p {
+            opacity: 0.9;
+            margin: 0;
+            font-size: 0.95em;
+        }
+        .content {
+            padding: 30px;
+        }
+        .amount-badge {
+            background: #f0f0f0;
+            border-radius: 60px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            border: 2px dashed #c72a2a;
+        }
+        .amount-badge p {
+            margin: 5px 0;
+            color: #555;
+            font-weight: 500;
+        }
+        .amount-badge .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #c72a2a;
+            line-height: 1.2;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 0.95em;
+        }
+        .input-icon {
+            position: relative;
+        }
+        .input-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #c72a2a;
+            font-size: 1.2em;
+        }
+        input[type="tel"] {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            font-size: 1.1em;
+            transition: border 0.3s, box-shadow 0.3s;
+            outline: none;
+        }
+        input[type="tel"]:focus {
+            border-color: #c72a2a;
+            box-shadow: 0 0 0 4px rgba(199,42,42,0.1);
+        }
+        .info-box {
+            background: #f9f9f9;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 5px solid #ff9900;
+        }
+        .info-box p {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .info-box i {
+            color: #ff9900;
+            font-size: 1.2em;
+            width: 24px;
+            text-align: center;
+        }
+        .btn-payer {
+            width: 100%;
+            background: linear-gradient(145deg, #c72a2a, #a02020);
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 20px rgba(199,42,42,0.3);
+        }
+        .btn-payer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(199,42,42,0.4);
+        }
+        .btn-payer:active {
+            transform: translateY(0);
+        }
+        .btn-payer i {
+            font-size: 1.2em;
+        }
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            color: #999;
+            font-size: 0.85em;
+        }
+        .footer-note i {
+            color: #ff9900;
+        }
+    </style>
 </head>
 <body>
-    <div class="resto-info">
-        <h1>Paiement {{ mode.replace('_', ' ') }}</h1>
-    </div>
-    <div class="form-container">
-        <form action="{{ url_for('payer_mobile') }}" method="post">
-            <input type="hidden" name="commande_id" value="{{ commande_id }}">
-            <input type="hidden" name="mode" value="{{ mode }}">
-            
-            <div class="form-group">
-                <label for="telephone">Numéro de téléphone</label>
-                <input type="tel" name="telephone" id="telephone" 
-                       placeholder="77 123 45 67" required>
+    <div class="card">
+        <div class="header">
+            <h1>
+                <i class="fas fa-mobile-alt"></i>
+                Paiement {{ mode.replace('_', ' ') }}
+            </h1>
+            <p>Sécurisé par PayTech</p>
+        </div>
+
+        <div class="content">
+            <div class="amount-badge">
+                <p>Montant à payer</p>
+                <div class="value">{{ commande['total'] }} FCFA</div>
             </div>
-            
-            <div class="info-paiement">
-                <p>Vous allez être redirigé vers la plateforme sécurisée de 
-                   <strong>{{ mode.replace('_', ' ') }}</strong>.</p>
-                <p>Montant : <strong>{{ commande['total'] }} FCFA</strong></p>
+
+            <form action="{{ url_for('payer_mobile') }}" method="post">
+                <input type="hidden" name="commande_id" value="{{ commande_id }}">
+                <input type="hidden" name="mode" value="{{ mode }}">
+
+                <div class="form-group">
+                    <label for="telephone">
+                        <i class="fas fa-phone-alt" style="margin-right: 5px; color: #c72a2a;"></i>
+                        Numéro de téléphone
+                    </label>
+                    <div class="input-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                        <input type="tel" name="telephone" id="telephone" 
+                               placeholder="77 123 45 67" required>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <p>
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Paiement 100% sécurisé</span>
+                    </p>
+                    <p>
+                        <i class="fas fa-redirect"></i>
+                        <span>Vous serez redirigé vers la plateforme <strong>{{ mode.replace('_', ' ') }}</strong></span>
+                    </p>
+                    <p>
+                        <i class="fas fa-clock"></i>
+                        <span>Validation immédiate</span>
+                    </p>
+                </div>
+
+                <button type="submit" class="btn-payer">
+                    <i class="fas fa-lock"></i>
+                    Procéder au paiement
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="footer-note">
+                <i class="fas fa-credit-card"></i> Orange Money, Wave, Free Money acceptés
             </div>
-            
-            <button type="submit" class="btn-payer">Procéder au paiement</button>
-        </form>
+        </div>
     </div>
 </body>
 </html>
